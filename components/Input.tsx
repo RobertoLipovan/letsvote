@@ -9,7 +9,7 @@ export default function Input({ room, setRoom }: { room: string, setRoom: (room:
             {({ hovered }) => (
                 <TextInput 
                     style={[styles.roomInput, hovered && styles.roomInputHovered]} 
-                    placeholder="ID de la sala"
+                    placeholder="ID de la salaa"
                     placeholderTextColor={hovered ? Colors.input.hovered.placeholder : Colors.input.normal.placeholder}
                     cursorColor={hovered ? Colors.input.hovered.content : Colors.input.normal.content}
                     value={room}
