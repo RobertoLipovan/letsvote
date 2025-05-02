@@ -9,6 +9,7 @@ const CommitInfo: React.FC = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>
+        {/* test */}
         {commitHash && commitMessage ? `${commitHash.substring(0, 7)}: ${commitMessage}` : 'No commit info'}
       </Text>
     </View>
