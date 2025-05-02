@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Colors } from "../constants";
 import { Hoverable } from 'react-native-web-hover';
 import Input from "../components/Input";
+import CommitInfo from "../components/CommitInfo";
 
 export default function Index() {
 
@@ -55,31 +56,36 @@ export default function Index() {
 
 
     return (
+        <>
 
-        <View style={styles.container}>
-            <View style={styles.content}>
+            <View style={styles.container}>
+                <View style={styles.content}>
 
-                <View style={styles.joinContainer}>
-                    <Input room={room} setRoom={setRoom} />
-                    <Hoverable style={{ flex: 1 }}>
+                    <View style={styles.joinContainer}>
+                        <Input room={room} setRoom={setRoom} />
+                        <Hoverable style={{ flex: 1 }}>
+                            {({ hovered }) => (
+                                <Pressable style={[styles.joinButton, hovered && styles.joinButtonHovered]} onPress={() => { handleJoinRoom(parseInt(room)) }}>
+                                    <Ionicons name="arrow-forward" size={24} color={hovered ? Colors.button.hovered.content : Colors.button.normal.content} />
+                                </Pressable>
+                            )}
+                        </Hoverable>
+                    </View>
+
+                    <Hoverable style={{ flex: 0 }}>
                         {({ hovered }) => (
-                            <Pressable style={[styles.joinButton, hovered && styles.joinButtonHovered]} onPress={() => { handleJoinRoom(parseInt(room)) }}>
-                                <Ionicons name="arrow-forward" size={24} color={hovered ? Colors.button.hovered.content : Colors.button.normal.content} />
+                            <Pressable style={[styles.createButton, hovered && styles.createButtonHovered]} onPress={() => { handleCreateRoom() }}>
+                                <Text style={[styles.buttonText, hovered && styles.buttonTextHovered]}>Crear una sala</Text>
                             </Pressable>
                         )}
                     </Hoverable>
+
                 </View>
-
-                <Hoverable style={{ flex: 0 }}>
-                    {({ hovered }) => (
-                        <Pressable style={[styles.createButton, hovered && styles.createButtonHovered]} onPress={() => { handleCreateRoom() }}>
-                            <Text style={[styles.buttonText, hovered && styles.buttonTextHovered]}>Crear una sala</Text>
-                        </Pressable>
-                    )}
-                </Hoverable>
-
             </View>
-        </View>
+
+            <CommitInfo />
+        </>
+
     );
 }
 
