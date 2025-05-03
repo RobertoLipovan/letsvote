@@ -34,7 +34,7 @@ export default function Layout() {
                 } : undefined}
             />
 
-            <VersionInfo version="1.1.0" />
+            <VersionInfo version="1.2.0" />
 
         </>
 
