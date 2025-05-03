@@ -6,15 +6,27 @@ import { useState } from "react";
 import { Colors } from "../constants";
 import { Hoverable } from 'react-native-web-hover';
 import Input from "../components/Input";
-import CommitInfo from "../components/CommitInfo";
+import { showMessage } from 'react-native-flash-message';
 
 export default function Index() {
 
     const [room, setRoom] = useState('');
+    // const [infboxVisible, setInfboxVisible] = useState(false);
+    // const [infboxTitle, setInfboxTitle] = useState('');
+    // const [infboxMessage, setInfboxMessage] = useState('');
 
     const handleCreateRoom = async () => {
 
         console.log("creando la sala...")
+
+        showMessage({
+            message: 'Funcionalidad no disponible',
+            type: 'warning',
+        });
+
+        // setInfboxTitle("Error");
+        // setInfboxMessage("Error creando la sala");
+        // setInfboxVisible(true);
 
         // // Create a new room
         // const { data: room, error } = await supabase
@@ -37,6 +49,15 @@ export default function Index() {
     const handleJoinRoom = async (id: number) => {
 
         console.log("entrando en la sala...")
+
+        showMessage({
+            message: 'Funcionalidad no disponible',
+            type: 'warning',
+        });
+
+        // setInfboxTitle("Error");
+        // setInfboxMessage("Error entrando en la sala");
+        // setInfboxVisible(true);
 
         // const { data, error } = await supabase
         //     .from('rooms')
@@ -61,8 +82,10 @@ export default function Index() {
             <View style={styles.container}>
                 <View style={styles.content}>
 
+                    <Text style={{ fontSize: 24, fontWeight: '900', color: Colors.app.white }}>Unirme a una sala</Text>
+
                     <View style={styles.joinContainer}>
-                        <Input room={room} setRoom={setRoom} />
+                        <Input placeholder="ID de la sala" value={room} setValue={setRoom} />
                         <Hoverable style={{ flex: 1 }}>
                             {({ hovered }) => (
                                 <Pressable style={[styles.joinButton, hovered && styles.joinButtonHovered]} onPress={() => { handleJoinRoom(parseInt(room)) }}>
@@ -71,6 +94,8 @@ export default function Index() {
                             )}
                         </Hoverable>
                     </View>
+
+                    <View style={{ height: 1, backgroundColor: Colors.app.white, opacity: 0.2 }}></View>
 
                     <Hoverable style={{ flex: 0 }}>
                         {({ hovered }) => (
@@ -83,7 +108,6 @@ export default function Index() {
                 </View>
             </View>
 
-            <CommitInfo />
         </>
 
     );
@@ -100,7 +124,7 @@ const styles = StyleSheet.create({
     content: {
         width: '100%',
         maxWidth: 400,
-        gap: 30,
+        gap: 10,
     },
     joinContainer: {
         height: 60,

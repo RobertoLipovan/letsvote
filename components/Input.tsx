@@ -3,17 +3,17 @@ import { Hoverable } from 'react-native-web-hover';
 import { TextInput, StyleSheet } from "react-native";
 import { Colors } from "../constants";
 
-export default function Input({ room, setRoom }: { room: string, setRoom: (room: string) => void }) {
+export default function Input({ placeholder, value, setValue }: { placeholder: string, value: string, setValue: (value: string) => void }) {
     return (
         <Hoverable style={{ width: '80%' }}>
             {({ hovered }) => (
                 <TextInput 
                     style={[styles.roomInput, hovered && styles.roomInputHovered]} 
-                    placeholder="ID de la salaa"
+                    placeholder={placeholder}
                     placeholderTextColor={hovered ? Colors.input.hovered.placeholder : Colors.input.normal.placeholder}
                     cursorColor={hovered ? Colors.input.hovered.content : Colors.input.normal.content}
-                    value={room}
-                    onChangeText={setRoom}
+                    value={value}
+                    onChangeText={setValue}
                     keyboardType="numeric"
                 />
             )}
