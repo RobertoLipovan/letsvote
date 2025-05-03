@@ -24,6 +24,7 @@ export default function Layout() {
             <ThemeProvider value={MyTheme}>
                 <Stack>
                     <Stack.Screen name="index" options={{ title: "Home", headerShown: false }} />
+                    <Stack.Screen name="[room]" options={{ title: "Room", headerShown: false }} />
                 </Stack>
             </ThemeProvider>
 

@@ -1,7 +1,9 @@
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
-// import { router } from "expo-router";
-// import { supabase } from "../supabase";
+import { router } from "expo-router";
+// import { supabase } from "../db/supabase"; -- su
+// import { createRoom } from "../db/rooms";
+import { createRoom } from "../firebase/db";
 import { useState } from "react";
 import { Colors } from "../constants";
 import { Hoverable } from 'react-native-web-hover';
@@ -11,39 +13,17 @@ import { showMessage } from 'react-native-flash-message';
 export default function Index() {
 
     const [room, setRoom] = useState('');
-    // const [infboxVisible, setInfboxVisible] = useState(false);
-    // const [infboxTitle, setInfboxTitle] = useState('');
-    // const [infboxMessage, setInfboxMessage] = useState('');
 
     const handleCreateRoom = async () => {
-
-        console.log("creando la sala...")
+        
+        const room = await createRoom("room");
 
         showMessage({
-            message: 'Funcionalidad no disponible',
-            type: 'warning',
+            message: 'Sala creada correctamente',
+            type: 'success',
         });
 
-        // setInfboxTitle("Error");
-        // setInfboxMessage("Error creando la sala");
-        // setInfboxVisible(true);
-
-        // // Create a new room
-        // const { data: room, error } = await supabase
-        //     .from('rooms')
-        //     .insert({})
-        //     .select('id')
-        //     .single();
-        // if (error) {
-        //     console.error('Error creating room:', error);
-        //     return;
-        // }
-
-        // console.log('Room created with ID:', room.id);
-        // console.log("entrando en la sala...")
-
-        // router.navigate(`/${room.id}`)
-
+        router.navigate(`/${room.id}`);
     };
 
     const handleJoinRoom = async (id: number) => {
@@ -55,23 +35,8 @@ export default function Index() {
             type: 'warning',
         });
 
-        // setInfboxTitle("Error");
-        // setInfboxMessage("Error entrando en la sala");
-        // setInfboxVisible(true);
-
-        // const { data, error } = await supabase
-        //     .from('rooms')
-        //     .select('id')
-        //     .eq('id', id)
-        //     .single();
-
-        // if (error) {
-        //     console.error('Error joining room:', error);
-        //     return;
-        // }
-
-        // console.log('Joined room with ID:', data.id);
-        // router.navigate(`/${data.id}`)
+        // router.navigate(`/room`)
+        
     };
 
 
