@@ -18,10 +18,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 16,
     right: 16,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    // backgroundColor: 'rgba(0, 0, 0, 0.7)',
     padding: 8,
     borderRadius: 10,
     marginBottom: Platform.OS === 'android' || Platform.OS === 'ios' ? 20 : 0,
+    zIndex: 9999,
   },
   text: {
     color: '#999',

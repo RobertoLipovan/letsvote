@@ -38,11 +38,33 @@ const WORDS = [
     'crystal',
 ];
 
+export function generateRandomNumbers() {
+    const numbers: number[] = [];
+    while (numbers.length < 5) {
+        const number = Math.floor(Math.random() * 9) + 1;
+        if (!numbers.includes(number)) {
+            numbers.push(number);
+        }
+    }
+    return numbers;
+}
+
 export async function createRoom(id?: string) {
+
     // Si no se proporciona ID, generamos uno aleatorio
     if (!id) {
-        const randomIndex = Math.floor(Math.random() * WORDS.length);
-        id = WORDS[randomIndex];
+
+        id = generateRandomNumbers().join(''); // Generamos un ID aleatorio
+
+        // Si se diera el caso de que el ID ya existiera
+        const roomRef = doc(db, "rooms", id);
+        const roomDoc = await getDoc(roomRef);
+
+        // Generar otro
+        if (roomDoc.exists()) {
+            return createRoom(); // Esto haría que todo volviera a empezar
+        }
+
     }
 
     const roomRef = doc(db, "rooms", id);

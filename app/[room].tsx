@@ -1,12 +1,13 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Pressable, Modal } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Pressable, Modal, Platform } from "react-native";
 import { useLocalSearchParams } from 'expo-router';
 import { useState, useEffect } from "react";
-import { createRoom, getParticipantsByRoomId, createParticipant, updateParticipant, resetVotes, subscribeToParticipants, subscribeToRoom, updateRoom } from "../firebase/db";
+import { getParticipantsByRoomId, createParticipant, updateParticipant, resetVotes, subscribeToParticipants, subscribeToRoom, updateRoom } from "../firebase/db";
 import { showMessage } from 'react-native-flash-message';
 import { Hoverable } from 'react-native-web-hover';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from "expo-blur";
 import { Colors } from "../constants";
+import Clipboard from "expo-clipboard";
 
 interface Participant {
     id: string;
@@ -38,26 +39,25 @@ export default function Room() {
     const [roomData, setRoomData] = useState<Room | null>(null);
     const votingNumbers = [1, 2, 3, 4, 5, 8, 13, 20, 40];
 
+    const copyToClipboard = async () => {
+        try {
+            await Clipboard.setStringAsync('https://letsvote.expo.app/' + roomParam);
+            showMessage({
+                message: 'Enlace copiado al portapapeles',
+                type: 'success',
+            });
+        } catch (error) {
+            console.error('Error al copiar al portapapeles:', error);
+            showMessage({
+                message: 'Función no disponible, estamos trabajando en ello',
+                type: 'warning',
+            });
+        }
+    };
+
     // Setup de la sala
     useEffect(() => {
         async function setupRoom() {
-
-            // CREADOR DE SALA AUTOMÁTICO //////////////////////////////////////////////////////
-
-            // const roomData = await createRoom(roomParam); // Si la sala no existe, la crea
-
-            // if (!roomData) {
-            //     await createRoom(roomParam);
-            //     // Establecer showing_votes a false por defecto
-            //     await supabase
-            //         .from('rooms')
-            //         .update({ showing_votes: false })
-            //         .eq('id', Number(roomParam));
-            //     const participant = await createParticipant(Number(roomParam), '', 'owner');
-            //     if (participant) { setMyId(participant.id); setRole('owner') }
-            // }
-
-            // GESTIÓN DE PARTICIPANTES ////////////////////////////////////////////////////////
 
             // 1. Obtenemos los participantes
             const participantsData = await getParticipantsByRoomId(roomParam);
@@ -77,11 +77,6 @@ export default function Room() {
                     setParticipants(prev => [...prev, participant]);
                 }
 
-                showMessage({
-                    message: 'Bienvenido, propietario',
-                    type: 'success',
-                });
-
             } else {
 
                 // Invitado
@@ -92,11 +87,6 @@ export default function Room() {
                 if (participant) {
                     setParticipants(prev => [...prev, participant]);
                 }
-
-                showMessage({
-                    message: 'Bienvenido, invitado',
-                    type: 'info',
-                });
 
             }
 
@@ -132,20 +122,14 @@ export default function Room() {
     // Petición del alias
     const handleAliasAssign = async () => {
 
-        console.log("asignando alias al participante " + myId + "...")
-
         const updatedParticipant = await updateParticipant(roomParam, myId, alias, role, null);
         if (updatedParticipant) {
-
-            console.log("alias asignado correctamente: ", updatedParticipant)
 
             setParticipants(prev =>
                 prev.map(p => (p.id === updatedParticipant.id ? updatedParticipant : p))
             );
             setModalVisible(false);
 
-        } else {
-            console.log("no se pudo asignar el alias")
         }
     }
 
@@ -159,8 +143,6 @@ export default function Room() {
 
     const handleVote = async (num: number) => {
 
-        console.log("el usuario " + myId + " votó por " + num + " habiendo votado previamente por " + selectedOption)
-
         // Si ya ha votado y no ha seleccionado una opción nueva, no permitir desmarcar
         if (hasVoted && selectedOption === num) {
             return;
@@ -168,7 +150,6 @@ export default function Room() {
 
         // Actualizar el estado de si ha votado
         if (num) {
-            console.log("el usuario " + myId + " votó por " + num)
             setHasVoted(true);
         }
 
@@ -212,16 +193,11 @@ export default function Room() {
                         <Text style={styles.roomLabel}>ID de la sala</Text>
                         <View style={styles.idContainer}>
                             <Text style={styles.id}>{room}</Text>
-                            <TouchableOpacity
+                            {/* <TouchableOpacity
                                 style={styles.shareButton}
-                                onPress={() => {
-                                    showMessage({
-                                        message: 'Enlace copiado al portapapeles',
-                                        type: 'success',
-                                    });
-                                }}>
+                                onPress={() => { copyToClipboard(); }}>
                                 <Ionicons name="share-social" size={50} color="grey" />
-                            </TouchableOpacity>
+                            </TouchableOpacity> */}
                         </View>
                     </View>
                     <View style={styles.votingBoard}>
@@ -330,26 +306,27 @@ export default function Room() {
                 visible={modalVisible}
                 onRequestClose={() => {
                     setModalVisible(!modalVisible);
-                }}>
-                {/* <BlurView> */}
-                    <BlurView intensity={20} tint="dark" style={styles.centeredView}>
-                        <View style={styles.modalView}>
-                            <Text style={styles.modalText}>¿Cómo te llamas?</Text>
-                            <TextInput
-                                style={styles.aliasInput}
-                                placeholder="Alias"
-                                placeholderTextColor={'grey'}
-                                value={alias}
-                                onChangeText={setAlias}
-                            />
-                            <Pressable
-                                style={styles.button}
-                                onPress={handleAliasAssign}>
-                                <Text style={styles.textStyle}>¡Votemos!</Text>
-                            </Pressable>
-                        </View>
-                    </BlurView>
-                {/* </BlurView> */}
+                }}
+                style={{ zIndex: 10 }}
+            >
+
+                <BlurView experimentalBlurMethod="dimezisBlurView" intensity={Platform.OS === 'android' ? 0 : 20} tint="dark" style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        <Text style={styles.modalText}>¿Cómo te llamas?</Text>
+                        <TextInput
+                            style={styles.aliasInput}
+                            placeholder="Alias"
+                            placeholderTextColor={'grey'}
+                            value={alias}
+                            onChangeText={setAlias}
+                        />
+                        <Pressable
+                            style={styles.button}
+                            onPress={handleAliasAssign}>
+                            <Text style={styles.textStyle}>¡Votemos!</Text>
+                        </Pressable>
+                    </View>
+                </BlurView>
             </Modal>
         </>
     )
