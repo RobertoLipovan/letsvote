@@ -1,9 +1,9 @@
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, StyleSheet, Pressable, Platform } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { router } from "expo-router";
 // import { supabase } from "../db/supabase"; -- su
 // import { createRoom } from "../db/rooms";
-import { createRoom } from "../firebase/db";
+import { createRoom, createRoomWithAutoId, getRoomById } from "../firebase/db";
 import { useState } from "react";
 import { Colors } from "../constants";
 import { Hoverable } from 'react-native-web-hover';
@@ -15,27 +15,38 @@ export default function Index() {
     const [room, setRoom] = useState('');
 
     const handleCreateRoom = async () => {
-        
-        const room = await createRoom("room");
 
-        showMessage({
-            message: 'Sala creada correctamente',
-            type: 'success',
-        });
+        const room = await createRoom();
+
+        // showMessage({
+        //     message: 'Sala creada correctamente',
+        //     type: 'success',
+        // });
 
         router.navigate(`/${room.id}`);
     };
 
-    const handleJoinRoom = async (id: number) => {
+    const handleJoinRoom = async (id: string) => {
 
-        console.log("entrando en la sala...")
+        // console.log("entrando en la sala...")
 
-        showMessage({
-            message: 'Funcionalidad no disponible',
-            type: 'warning',
-        });
+        // showMessage({
+        //     message: 'Funcionalidad no disponible',
+        //     type: 'warning',
+        // });
 
-        // router.navigate(`/room`)
+        // TODO: Validar que la sala exista
+        const room = await getRoomById(id);
+
+        if (!room) {
+            showMessage({
+                message: 'Sala no encontrada',
+                type: 'danger',
+            });
+            return;
+        }
+
+        router.navigate(`/${id}`)
         
     };
 
@@ -53,7 +64,7 @@ export default function Index() {
                         <Input placeholder="ID de la sala" value={room} setValue={setRoom} />
                         <Hoverable style={{ flex: 1 }}>
                             {({ hovered }) => (
-                                <Pressable style={[styles.joinButton, hovered && styles.joinButtonHovered]} onPress={() => { handleJoinRoom(parseInt(room)) }}>
+                                <Pressable style={[styles.joinButton, hovered && styles.joinButtonHovered]} onPress={() => { handleJoinRoom(room) }}>
                                     <Ionicons name="arrow-forward" size={24} color={hovered ? Colors.button.hovered.content : Colors.button.normal.content} />
                                 </Pressable>
                             )}

@@ -30,12 +30,10 @@ export default function Layout() {
 
             <FlashMessage
                 position="top"
-                style={Platform.OS === 'android' || Platform.OS === 'ios' ? {
-                    paddingTop: Constants.statusBarHeight
-                } : undefined}
+                style={Platform.OS === 'android' || Platform.OS === 'ios' ? { paddingTop: Constants.statusBarHeight } : { paddingTop: undefined }}
             />
 
-            <VersionInfo version="1.2.0" />
+            <VersionInfo version="v0.0.1" />
 
         </>
 
