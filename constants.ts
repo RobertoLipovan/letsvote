@@ -32,7 +32,7 @@ export const Colors = {
             content: "#BABABA",
         },
         hovered: {
-            background: "#585858",
+            background: "#323232",
             placeholder: "#A6A6A6",
             content: "#CBCBCB",
         }

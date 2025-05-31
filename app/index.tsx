@@ -1,14 +1,13 @@
 import { View, Text, StyleSheet, Pressable, Platform } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { router } from "expo-router";
-// import { supabase } from "../db/supabase"; -- su
-// import { createRoom } from "../db/rooms";
 import { createRoom, createRoomWithAutoId, getRoomById } from "../firebase/db";
 import { useState } from "react";
 import { Colors } from "../constants";
 import { Hoverable } from 'react-native-web-hover';
 import Input from "../components/Input";
 import { showMessage } from 'react-native-flash-message';
+import React from "react"
 
 export default function Index() {
 
@@ -18,24 +17,11 @@ export default function Index() {
 
         const room = await createRoom();
 
-        // showMessage({
-        //     message: 'Sala creada correctamente',
-        //     type: 'success',
-        // });
-
         router.navigate(`/${room.id}`);
     };
 
     const handleJoinRoom = async (id: string) => {
 
-        // console.log("entrando en la sala...")
-
-        // showMessage({
-        //     message: 'Funcionalidad no disponible',
-        //     type: 'warning',
-        // });
-
-        // TODO: Validar que la sala exista
         const room = await getRoomById(id);
 
         if (!room) {

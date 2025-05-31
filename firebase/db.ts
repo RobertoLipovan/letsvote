@@ -1,11 +1,11 @@
 import { app } from "./init";
-import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, onSnapshot } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, onSnapshot, updateDoc } from "firebase/firestore";
 
 export const db = getFirestore(app);
 
-
-interface Room {
+export interface Room {
     id: string;
+    name: string;
     showVotes: boolean;
 }
 
@@ -62,7 +62,7 @@ export async function createRoom(id?: string) {
 
         // Generar otro
         if (roomDoc.exists()) {
-            return createRoom(); // Esto haría que todo volviera a empezar
+            return createRoom(); // Recursividad hasta que se se logre crear
         }
 
     }
@@ -76,6 +76,7 @@ export async function createRoom(id?: string) {
 
     await setDoc(roomRef, {
         showVotes: false,
+        name: id
     });
     return roomRef;
 }
@@ -93,10 +94,11 @@ export async function createRoomWithAutoId() {
     return docRef;
 }
 
-export async function updateRoom(roomId: string, showVotes: boolean) {
+export async function updateRoom(roomId: string, showVotes: boolean, name: string) {
     const roomRef = doc(db, "rooms", roomId);
     await setDoc(roomRef, {
         showVotes,
+        name,
     });
 }
 
@@ -169,6 +171,15 @@ export async function updateParticipant(roomId: string, id: string, alias: strin
         id: docSnapshot.id,
         ...docSnapshot.data()
     };
+}
+
+export async function updateParticipantAlias(roomId: string, participantId: string, newAlias: string) {
+
+    const participantRef = doc(db, "rooms", roomId, "participants", participantId);
+    await updateDoc(participantRef, {
+        alias: newAlias
+    });
+
 }
 
 export async function resetVotes(roomId: string) {

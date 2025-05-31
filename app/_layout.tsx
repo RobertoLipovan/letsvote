@@ -6,6 +6,7 @@ import FlashMessage from 'react-native-flash-message';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import VersionInfo from "../components/VersionInfo";
+import React from "react";
 
 export default function Layout() {
 
@@ -24,6 +25,7 @@ export default function Layout() {
             <ThemeProvider value={MyTheme}>
                 <Stack>
                     <Stack.Screen name="index" options={{ title: "Home", headerShown: false }} />
+                    <Stack.Screen name="test" options={{ title: "Test", headerShown: false }} />
                     <Stack.Screen name="[room]" options={{ title: "Room", headerShown: false }} />
                 </Stack>
             </ThemeProvider>

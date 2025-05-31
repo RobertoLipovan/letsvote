@@ -1,12 +1,17 @@
 import React from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import Constants from 'expo-constants';
+import { router } from "expo-router";
 
 const VersionInfo: React.FC<{ version: string }> = ({ version }) => {
 
+  const goToTest = () => {
+    router.navigate('/test')
+  }
+
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>
+      <Text style={styles.text} onPress={goToTest}>
         {version}
       </Text>
     </View>

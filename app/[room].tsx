@@ -1,13 +1,15 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Pressable, Modal, Platform } from "react-native";
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Pressable, Modal, Platform, ScrollView } from "react-native";
 import { useLocalSearchParams } from 'expo-router';
 import { useState, useEffect } from "react";
-import { getParticipantsByRoomId, createParticipant, updateParticipant, resetVotes, subscribeToParticipants, subscribeToRoom, updateRoom } from "../firebase/db";
+import { Room, getParticipantsByRoomId, createParticipant, updateParticipant, updateParticipantAlias, resetVotes, subscribeToParticipants, subscribeToRoom, updateRoom } from "../firebase/db";
 import { showMessage } from 'react-native-flash-message';
 import { Hoverable } from 'react-native-web-hover';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from "expo-blur";
 import { Colors } from "../constants";
 import Clipboard from "expo-clipboard";
+import Input from "../components/Input"
 
 interface Participant {
     id: string;
@@ -18,13 +20,7 @@ interface Participant {
     created_at: string;
 }
 
-interface Room {
-    id: string;
-    showVotes: boolean;
-}
-
-
-export default function Room() {
+export default function RoomScreen() {
 
     const { room } = useLocalSearchParams();
     const roomParam = Array.isArray(room) ? room[0] : room;
@@ -121,7 +117,6 @@ export default function Room() {
 
     // Petición del alias
     const handleAliasAssign = async () => {
-
         const updatedParticipant = await updateParticipant(roomParam, myId, alias, role, null);
         if (updatedParticipant) {
 
@@ -131,6 +126,20 @@ export default function Room() {
             setModalVisible(false);
 
         }
+    }
+
+    const handleAliasChange = async (newAlias: string) => {
+
+        // Actualizacón optimista local
+        setParticipants(prev => (
+            prev.map(p =>
+                p.id === myId ? { ...p, alias: newAlias } : p)
+            )
+        )
+
+        // Actualizamos en firebase
+        await updateParticipantAlias(roomParam, myId, newAlias);
+
     }
 
     // handleReset: debe ir a cada uno de los participantes de la sala y poner su voto en null
@@ -171,8 +180,10 @@ export default function Room() {
     }
 
     const handleShowVotes = async () => {
-        await updateRoom(roomParam, !showingVotes);
-        setShowingVotes(!showingVotes);
+        if (roomData) {
+            await updateRoom(roomParam, !showingVotes, roomData.name);
+            setShowingVotes(!showingVotes);
+        }
     }
 
     useEffect(() => {
@@ -184,35 +195,65 @@ export default function Room() {
         }
     }, [participants, myId]);
 
+    const handleRoomNameChange = async (newName: string) => {
+        if (roomData) {
+            // Actualización optimista local
+            setRoomData({
+                ...roomData,
+                name: newName
+            });
+            // Actualización en Firebase
+            await updateRoom(roomParam, roomData.showVotes, newName);
+        }
+    }
+
 
     return (
         <>
             <View style={styles.container}>
                 <View style={styles.content}>
                     <View style={styles.roomData}>
-                        <Text style={styles.roomLabel}>ID de la sala</Text>
-                        <View style={styles.idContainer}>
-                            <Text style={styles.id}>{room}</Text>
-                            {/* <TouchableOpacity
-                                style={styles.shareButton}
-                                onPress={() => { copyToClipboard(); }}>
-                                <Ionicons name="share-social" size={50} color="grey" />
-                            </TouchableOpacity> */}
-                        </View>
+                        <Text style={styles.roomLabel}>Nombre de la sala</Text>
+
+                        <Input
+                            placeholder="nombre de la sala"
+                            value={roomData?.name}
+                            setValue={handleRoomNameChange}
+                        />
+
                     </View>
                     <View style={styles.votingBoard}>
                         <View style={styles.headerBoard}>
                             <Text style={styles.headerBoardText}>Nombre</Text>
                             <Text style={styles.headerBoardText}>Voto</Text>
                         </View>
-                        <View style={styles.voteList}>
+                        <ScrollView 
+                            style={styles.voteList}
+                            showsVerticalScrollIndicator={true}
+                            contentContainerStyle={{
+                                justifyContent: 'center',
+                            }}
+                        >
                             {participants.map(participant => (
                                 <Hoverable key={participant.id}>
                                     {({ hovered }) => (
                                         <View style={[styles.vote, hovered && styles.voteHovered]}>
                                             <View style={styles.identification}>
-                                                {/* <Text style={[styles.voteText, styles.aliasText]}>{participant.id}</Text> */}
-                                                <Text style={[styles.voteText, styles.aliasText]}>{participant.alias}</Text>
+
+                                                {/* <TextInput
+                                                    style={[styles.aliasText]}
+                                                    value={participant.alias}
+                                                /> */}
+
+                                                <Input
+                                                
+                                                    placeholder='alias'
+                                                    value={participant.alias}
+                                                    setValue={handleAliasChange}
+                                                    editable= {participant.id === myId ? true : false}
+
+                                                />
+
                                                 <Text
                                                     style={[
                                                         styles.roleText,
@@ -233,16 +274,21 @@ export default function Room() {
                                                     </Text>
                                                 )}
                                             </View>
+                                            <View style={{
+                                                // backgroundColor: 'grey',
+                                                justifyContent: 'center',
+                                            }}>
                                             {showingVotes || participant.id === myId
                                                 ? (participant.vote !== null && participant.vote !== undefined ?
                                                     <Text style={styles.voteText}>{participant.vote}</Text> :
                                                     <Text style={styles.voteText}>—</Text>)
                                                 : <Ionicons name="eye-off" size={24} color="#fff" />}
+                                            </View>
                                         </View>
                                     )}
                                 </Hoverable>
                             ))}
-                        </View>
+                        </ScrollView>
 
                         {role === 'owner' && (
 
@@ -300,6 +346,8 @@ export default function Room() {
                     </View>
                 </View>
             </View>
+
+
             <Modal
                 animationType="fade"
                 transparent={true}
@@ -328,7 +376,7 @@ export default function Room() {
                     </View>
                 </BlurView>
             </Modal>
-        </>
+        </>        
     )
 }
 
@@ -348,8 +396,10 @@ const styles = StyleSheet.create({
         gap: 25,
     },
     roomData: {
-        alignItems: 'flex-start',
-        justifyContent: 'center',
+        // flex: 1,
+        // width: '100%',
+        // alignItems: 'flex-start',
+        // justifyContent: 'center',
     },
     roomLabel: {
         color: 'grey',
@@ -357,6 +407,7 @@ const styles = StyleSheet.create({
         fontWeight: '900',
     },
     idContainer: {
+        // flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         gap: 10,
@@ -365,6 +416,8 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
         fontSize: 64,
         fontWeight: '900',
+        width: '100%',
+        ...(Platform.OS === 'web' ? { outline: 'none' } : {})
     },
     votingBoard: {
         borderRadius: 20,
@@ -389,6 +442,7 @@ const styles = StyleSheet.create({
     voteList: {
         backgroundColor: '#464646',
         paddingVertical: 5,
+        maxHeight: 500,
     },
     vote: {
         flexDirection: 'row',
@@ -403,11 +457,15 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
         fontSize: 24,
         fontWeight: '700',
+        // height: '100%',
     },
     aliasText: {
-        // backgroundColor: '#393939',
+        // flex: 0,
+        color: '#FFFFFF',
+        fontSize: 24,
+        fontWeight: '700',
         borderRadius: 7,
-        // paddingHorizontal: 8,
+        backgroundColor: 'grey',
     },
     centeredView: {
         flex: 1,
@@ -535,3 +593,4 @@ const styles = StyleSheet.create({
         gap: 10,
     },
 });
+
